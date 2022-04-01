@@ -15,4 +15,5 @@ Synex is a Solana utility token for buying, trading, and integrating crypto into
 - Boost donations with an optional crypto-to-ingame currency exchanger built in
 
 Telegram: https://t.me/synexchat
+
 Website: https://synexcoin.dev
