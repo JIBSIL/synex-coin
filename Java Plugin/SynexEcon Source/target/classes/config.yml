@@ -1,0 +1,16 @@
+starting-balance: 100
+api_url: 'http://apiurl.local/yourApiKey'
+messages:
+  no_permission: "&cYou do not have permission to use this command"
+  only_player: "&cOnly players may execute this command!"
+  pay_usage: "&cUsage: &7/pay <name>"
+  pay_msg: "&eYou have sent &a%amount%$&e to &b%player%"
+  receive_msg: "&eYou have received &a%amount% from %player%"
+  invalid_player: "&cThe specified player is invalid!"
+  invalid_amount: "&cThe amount specified is invalid!"
+  insufficient_funds: "&cYou do not have &a%amount%$&c to send"
+  eco_usage: "&cUsage: &7/eco help"
+  eco_help: "&7&m&l----------&r &eEconomy Help &7&m&l----------&r\n&71. /eco set <name> <amount> &3- Sets the balance of the given player\n&72. /eco add <name> <amount> &3- Gives the specified player the amount of money\n&73. /eco remove <name> <amount> &3- Removes the amount of money from the players account"
+  set_msg: "&a%player%'s balance has been set to %amount%"
+  set_receiver_msg: "&eYour balance has been set to %amount%"
+  balance_msg: "&aYour balance is %amount%$"
