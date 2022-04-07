@@ -1,9 +1,9 @@
 on script load:
 	delete {crypto::started}
-	set {crypto::apikey} to "098f6bcd4621d373cade4e832627b4f6"
+	set {crypto::apikey} to "098f6bcd4621d373cade4e832627b4f6" # your api key. defaults to the md5 hash of 'test'
 	set {crypto::url} to "https://dev.synexcoin.dev" # api url
 	set {crypto::rate} to 100 # Ingame MINECRAFT to Real MINECRAFT rate (1 = 1:1)
-	set {crypto::walletAddress} to "B7eRo5TnKsT3Y18UXvnCx9MP2QHPxSVj9QnF2MtdUxai"
+	set {crypto::walletAddress} to "yourSolanaAddress"
 	send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/import/setWalletAddress/%{crypto::walletAddress}%/%{crypto::rate}%"
 	send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/import/startMonitor"
 	set {_req} to the last received response
@@ -36,7 +36,7 @@ every 5 seconds:
 				set {_successError::*} to {_reqbody} split at ","
 				if {_successError::1} is "Success":
 					set {_log::*} to {_successError::2} split at newline
-					set {_amount} to ({_partsOfTx::2} parsed as a number) * 100
+					set {_amount} to ({_partsOfTx::2} parsed as a number) * ({crypto::rate} parsed as a number)
 					send "&2Economy System &8» &a&lYou recieved %{_partsOfTx::2}% &a&lMINECRAFT by Import!" to ({_memoNewline::1} parsed as a player)
 					send "&2Economy System &8» &aThis was converted to &b%{_amount}%&a based on the server's rate of &b%{crypto::rate}%&a Ingame MINECRAFT to 1 Real MINECRAFT" to ({_memoNewline::1} parsed as a player)
 					play sound "BLOCK_NOTE_BLOCK_BIT" to ({_memoNewline::1} parsed as a player)
@@ -56,6 +56,16 @@ command /bal:
 	trigger:
 		make player execute command "/crypto balance"
 
+command /pay [<text>] [<text>]:
+	trigger:
+		if arg-1 is not set:
+			send "&2Economy System &8» &rSpecify an address to pay, for example /pay Steve 100"
+			stop
+		if arg-2 is not set:
+			send "&2Economy System &8» &rSpecify an amount, for example /pay Steve 100"
+			stop
+		make player execute command "/crypto send %arg-1% %arg-2%"
+
 command /crypto [<text>] [<text>] [<text>] [<text>]:
 	trigger:
 		if arg-1 is not set:
@@ -65,18 +75,18 @@ command /crypto [<text>] [<text>] [<text>] [<text>]:
 			if player has the permission "crypto.export":
 				if arg-2 is not set:
 					send "&2Economy System &8» &rSpecify an address to send to, for example: /crypto export SolanaMinecraftAddress 100"
-					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e100 Ingame : 1 Real &arate"
+					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e%{crypto::rate}%&e Ingame : 1 Real &arate"
 					send "&2Economy System &8» &rMake sure you have a MINECRAFT token account created in your web wallet!"
 					send "&2Economy System &8» &rWe recommend the wallet Phantom (phantom.app) to use, but another good one is Solflare"
 					stop
 				if arg-3 is not set:
 					send "&2Economy System &8» &rSpecify an amount, for example /crypto export SolanaMinecraftAddress 100"
-					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e100 Ingame : 1 Real &arate"
+					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e%{crypto::rate}%&e Ingame : 1 Real &arate"
 					send "&2Economy System &8» &rMake sure you have a MINECRAFT token account created in your web wallet!"
 					send "&2Economy System &8» &rWe recommend the wallet Phantom (phantom.app) to use, but another good one is Solflare"
 					stop
 				if arg-4 is not "confirm":
-					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e100 Ingame : 1 Real &arate"
+					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e%{crypto::rate}%&e Ingame : 1 Real &arate"
 					send "&2Economy System &8» &aAdd ""confirm"" to your command (like /crypto export SolanaMinecraftAddress 100 &econfirm&a) to export and bypass this message"
 					stop
 				send a request to "%{crypto::url}%/%{crypto::apikey}%/exportTokens/%arg-2%/%(argument 3 parsed as an integer) / {crypto::rate}%/%player's uuid%"
