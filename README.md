@@ -1,5 +1,3 @@
-### Repository is still in maintenance, expect some things to be broken
-
 # synex-coin
 Synex is a Solana utility token for buying, trading, and integrating crypto into Minecraft.
 
