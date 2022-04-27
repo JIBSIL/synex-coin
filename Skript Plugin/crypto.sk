@@ -1,0 +1,198 @@
+on script load:
+	delete {crypto::started}
+	set {crypto::apikey} to "098f6bcd4621d373cade4e832627b4f6" # your api key. defaults to the md5 hash of 'test'
+	set {crypto::url} to "https://dev.synexcoin.dev" # api url
+	set {crypto::rate} to 100 # Ingame MINECRAFT to Real MINECRAFT rate (1 = 1:1)
+	set {crypto::walletAddress} to "yourSolanaAddress"
+	send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/import/setWalletAddress/%{crypto::walletAddress}%/%{crypto::rate}%"
+	send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/import/startMonitor"
+	set {_req} to the last received response
+	set {_reqbody} to the response body of {_req}
+	set {_successError::*} to {_reqbody} split at ","
+	if {_successError::1} is "Success":
+		send "&2Economy System &8» &b&lCrypto: Set address to %{crypto::walletAddress}%&b&l and started" to console
+		set {crypto::started} to "Started"
+	if {_successError::1} is "Error":
+		if {_successError::2} contains "Already running":
+			send "&b&lCrypto importing started" to console
+			set {crypto::started} to "Started"
+		else:
+			send "&2Economy System &8» &c&lCrypto: Could not start, %{_successError::2}%" to console
+
+every 5 seconds:
+	if {crypto::started} is set:
+		send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/import/readData"
+		set {_req} to the last received response
+		set {_reqbody} to the response body of {_req}
+		set {_successError::*} to {_reqbody} split at ";"
+		if {_successError::1} is "Success":
+			set {_transactions::*} to {_successError::2} split at ","
+			loop {_transactions::*}:
+				set {_partsOfTx::*} to {_transactions::%loop-index%} split at ":"
+				set {_memoNewline::*} to {_partsOfTx::3} split at newline
+				send a request to "%{crypto::url}%/%{crypto::apikey}%/airdrop/%{_memoNewline::1}%/%({_partsOfTx::2} parsed as a number) * {crypto::rate}%"
+				set {_req} to the last received response
+				set {_reqbody} to the response body of {_req}
+				set {_successError::*} to {_reqbody} split at ","
+				if {_successError::1} is "Success":
+					set {_log::*} to {_successError::2} split at newline
+					set {_amount} to ({_partsOfTx::2} parsed as a number) * ({crypto::rate} parsed as a number)
+					send "&2Economy System &8» &a&lYou recieved %{_partsOfTx::2}% &a&lMINECRAFT by Import!" to ({_memoNewline::1} parsed as a player)
+					send "&2Economy System &8» &aThis was converted to &b%{_amount}%&a based on the server's rate of &b%{crypto::rate}%&a Ingame MINECRAFT to 1 Real MINECRAFT" to ({_memoNewline::1} parsed as a player)
+					play sound "BLOCK_NOTE_BLOCK_BIT" to ({_memoNewline::1} parsed as a player)
+					send title "&b⚠ TOKEN IMPORT ⚠" with subtitle "&7You just received &f&n%{_partsOfTx::2}%&7 MINECRAFT" to ({_memoNewline::1} parsed as a player) for 5 seconds with fadein 0 seconds and fadeout 0 seconds
+				if {_successError::1} is "Error":
+					send "&2Economy System &8» &c&lError! Debug log: %{_successError::2}%" to console
+			send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/import/deleteData"
+			send "&b&lImported tokens" to console
+		if {_successError::1} is "Error":
+			if {_successError::2} contains "Not started":
+				send "&2Economy System &8» &c&lCrypto: Looks like the importer wasn't started, try reloading the skript" to console
+			#if {_successError::2} contains "No Transactions":
+				#send "&2Economy System &8» &c&lCrypto: No transactions were found" to console # debugging
+
+command /bal:
+	aliases: /balance
+	trigger:
+		make player execute command "/crypto balance"
+
+command /pay [<text>] [<text>]:
+	trigger:
+		if arg-1 is not set:
+			send "&2Economy System &8» &rSpecify an address to pay, for example /pay Steve 100"
+			stop
+		if arg-2 is not set:
+			send "&2Economy System &8» &rSpecify an amount, for example /pay Steve 100"
+			stop
+		make player execute command "/crypto send %arg-1% %arg-2%"
+
+command /crypto [<text>] [<text>] [<text>] [<text>]:
+	trigger:
+		if arg-1 is not set:
+			send "&2Economy System &8» &rSpecify a command. Valid subcommands: /crypto export, /crypto send, /crypto balance"
+			stop
+		if arg-1 is "export":
+			if player has the permission "crypto.export":
+				if arg-2 is not set:
+					send "&2Economy System &8» &rSpecify an address to send to, for example: /crypto export SolanaMinecraftAddress 100"
+					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e%{crypto::rate}%&e Ingame : 1 Real &arate"
+					send "&2Economy System &8» &rMake sure you have a MINECRAFT token account created in your web wallet!"
+					send "&2Economy System &8» &rWe recommend the wallet Phantom (phantom.app) to use, but another good one is Solflare"
+					stop
+				if arg-3 is not set:
+					send "&2Economy System &8» &rSpecify an amount, for example /crypto export SolanaMinecraftAddress 100"
+					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e%{crypto::rate}%&e Ingame : 1 Real &arate"
+					send "&2Economy System &8» &rMake sure you have a MINECRAFT token account created in your web wallet!"
+					send "&2Economy System &8» &rWe recommend the wallet Phantom (phantom.app) to use, but another good one is Solflare"
+					stop
+				if arg-4 is not "confirm":
+					send "&2Economy System &8» &aIngame MINECRAFT and real MINECRAFT are traded at a &e%{crypto::rate}%&e Ingame : 1 Real &arate"
+					send "&2Economy System &8» &aAdd ""confirm"" to your command (like /crypto export SolanaMinecraftAddress 100 &econfirm&a) to export and bypass this message"
+					stop
+				send a request to "%{crypto::url}%/%{crypto::apikey}%/exportTokens/%arg-2%/%(argument 3 parsed as an integer) / {crypto::rate}%/%player's uuid%"
+				set {_req} to the last received response
+				set {_reqbody} to the response body of {_req}
+				set {_successError::*} to {_reqbody} split at ","
+				if {_successError::1} is "Success":
+					send "&6Sent %(argument 3 parsed as an integer) / {crypto::rate}%!"
+					set {_tx::*} to {_successError::2} split at newline
+					set {_formatted} to "&2Economy System &8» &aSuccess! <link:https://solscan.io/tx/%{_tx::1}%>&aClick here to view transaction in the Blockchain Explorer<reset>"
+					send formatted {_formatted}
+				if {_successError::1} is "Error":
+					send "&2Economy System &8» &rError! Debug log: %{_successError::2}%! Report this to staff!"
+
+		if arg-1 is "sendOthers":
+			if player has the permission "crypto.sendOthers":
+				if arg-2 is not set:
+					send "&2Economy System &8» &rSpecify a player to send from, for example /crypto send FROM TO 100"
+					stop
+				if arg-3 is not set:
+					send "&2Economy System &8» &rSpecify a player to send to, for example /crypto send FROM TO 100"
+				if arg-4 is not set:
+					send "&2Economy System &8» &rSpecify an amount, for example /crypto send FROM TO 100"
+					stop
+				set {_fromUname} to arg-2 parsed as offline player
+				set {_toUname} to arg-3 parsed as offline player
+				set {_from} to {_fromUname}'s uuid
+				set {_to} to {_toUname}'s uuid
+				send a request to "%{crypto::url}%/%{crypto::apikey}%/send/%{_from}%/%{_to}%/%arg-4%"
+				set {_req} to the last received response
+				set {_reqbody} to the response body of {_req}
+				set {_successError::*} to {_reqbody} split at ","
+				if {_successError::1} is "Success":
+					send "&2Economy System &8» &aSent &a%rounded ({_successError::2} parsed as a number)% &afrom &a%{_successError::3}% &ato &a%{_successError::4}%"
+				if {_successError::1} is "Error":
+					send "&2Economy System &8» &cError! Debug log: %{_successError::2}%&c! Report this to staff!"
+					
+		if arg-1 is "airdrop":
+			if player has the permission "crypto.airdrop":
+				if arg-2 is not set:
+					send "&2Economy System &8» &rSpecify a player to airdrop to, for example /crypto airdrop TO 100"
+				if arg-3 is not set:
+					send "&2Economy System &8» &rSpecify an amount, for example /crypto airdrop TO 100"
+					stop
+				send a request to "%{crypto::url}%/%{crypto::apikey}%/airdrop/%player's uuid%/%arg-3%"
+				set {_req} to the last received response
+				set {_reqbody} to the response body of {_req}
+				set {_successError::*} to {_reqbody} split at ","
+				if {_successError::1} is "Success":
+					set {_log::*} to {_successError::2} split at newline
+					send "&2Economy System &8» &aSent! New balance: &a%rounded ({_log::1} parsed as a number)%"
+				if {_successError::1} is "Error":
+					send "&2Economy System &8» &c&lDebug log: %{_successError::2}%"
+					
+		if arg-1 is "send":
+			if player has the permission "crypto.send":
+				if arg-2 is not set:
+					send "&2Economy System &8» &rSpecify an address to pay, for example /crypto send TO 100"
+				if arg-3 is not set:
+					send "&2Economy System &8» &rSpecify an amount, for example /crypto send TO 100"
+					stop
+				if (arg-2 parsed as an offline player) is not online:
+					send "&6That player isn't online!"
+					stop
+				send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/send/%player's uuid%/%(arg-2 parsed as an offline player)'s uuid%/%arg-3%"
+				set {_req} to the last received response
+				set {_reqbody} to the response body of {_req}
+				set {_successError::*} to {_reqbody} split at ","
+				if {_successError::1} is "Success":
+					set {_log::*} to {_successError::4} split at newline
+					send "&2Economy System &8» &aSent %{_successError::2}%&a MINECRAFT! Your new balance is %rounded ({_log::1} parsed as a number)% &aMINECRAFT"
+					send "&2Economy System &8» &aYou received %rounded ({_successError::2} parsed as a number)% &aMINECRAFT from %player%&a!" to (arg-2 parsed as an offline player)
+				if {_successError::1} is "Error":
+					set {_err::*} to {_successError::2} split at newline
+					send "&2Economy System &8» &c&lError! Log: %{_err::1}%"
+					
+		if arg-1 is "balance":
+			if arg-2 is "others":
+				if player has the permission "crypto.balance.others":
+					send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/balance/%(arg-3 parsed as an offline player)'s uuid%"
+					set {_req} to the last received response
+					set {_reqbody} to the response body of {_req}
+					set {_successError::*} to {_reqbody} split at ","
+					if {_successError::1} is "Success":
+						set {_log::*} to {_successError::2} split at newline
+						send "&2Economy System &8» &a%arg-3%'s balance is %rounded ({_log::1} parsed as a number)%&a MINECRAFT"
+					if {_successError::1} is "Error":
+						set {_err::*} to {_successError::2} split at newline
+						send "&2Economy System &8» &c&lError! Log: %{_err::1}%"
+				else:
+					send "&2Economy System &8» &c&lNot enough permissions!"
+			else:
+				if player has the permission "crypto.balance":
+					send a "get" request to "%{crypto::url}%/%{crypto::apikey}%/balance/%player's uuid%"
+					set {_req} to the last received response
+					set {_reqbody} to the response body of {_req}
+					set {_successError::*} to {_reqbody} split at ","
+					if {_successError::1} is "Success":
+						set {_log::*} to {_successError::2} split at newline
+						send "&2Economy System &8» &aYour balance is %rounded ({_log::1} parsed as a number)% &aMINECRAFT"
+					if {_successError::1} is "Error":
+						set {err::*} to {_successError::2} split at newline
+						send "&2Economy System &8» &c&lError! Log: %{_err::1}%"
+
+on tab complete of "/crypto":
+	if player has the permissions "crypto.airdrop" and "crypto.sendOthers":
+		set tab completions for position 1 to "export", "sendOthers", "airdrop", "send", "balance"
+	else:
+		set tab completions for position 1 to "export", "send", "balance"
