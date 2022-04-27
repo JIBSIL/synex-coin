@@ -27,6 +27,7 @@ Website: https://synexcoin.dev
 *If the crypto is not sent, it should be refunded back to your wallet for you to try again. If it's not, it is likely a problem on the server owner's side and should be refunded by staff members (as the crypto never left the owner's wallet).*
 
 ## Using Synex as a server:
+### We know that most server owners don't want to run their own version of the API (which requires a working Linux environment) and will be happy to host it for anyone, for free! Just contact us here and we'll get you set up: https://t.me/synexchat
 1. Get a version of the API. Currently, we let server owners request a grant of tokens and a live version of the API to use, hosted by us. This will be a web address and an API key, for example: https://api.synexcoin.dev/apiKey (but you're welcome to use your own domain!)
 2. Make a Synex Coin token account using Phantom or Solflare. You may get free tokens by applying for a grant: message @JIBSIL on telegram.
 3. Install Skript, SkQuery, SkBee and Reqn (dependencies) as well as WebEcon and crypto.sk (built in-house by us). See the FAQ for info on exactly what these do.
