@@ -38,16 +38,23 @@ Website: https://synexcoin.dev
 
 Wait, but what if I don't want to use Synex as a player on a Synex-supported server?
 - You can opt-out of using synex simply by not exporting. This does not require any further steps.
+
+
 What if I want to import Synex Coin tokens (as a player)?
 - You can import tokens by using a web importing tool. This securely connects to your wallet and takes an amount you request, uses the server's exchange rate to convert to ingame currency and credits the tokens to whatever user you choose. You can always export the tokens later. Since this all takes place on a decentralized blockchain, **server owners can not authorize transactions on your behalf** and your coins are safe throughout the importing process.
+
+
 What if I want to allow importing of tokens (as a server owner)?
 - To allow importing, you have to set your wallet you use in the settings of the frontend skript (for example, crypto.sk). You also have to set the wallet address in the backend .js script. You also have to self-host a version of the .html importer webpage for users to import.
 *A feature that simplifies this process will be added soon.*
+
 Why do I have to run so many plugins for Synex to work, and what do they all do??
 - Synex runs off of a plugin called Skript, which is the language that Synex is coded in. This plugin is **required** for Synex to work.
 - SkQuery and SkBee are **optional**. We sometimes use methods from these plugins and plan to use a lot of it in the future. For future-proofing, these are recommended. These are what are known as Skript "addons", or plugins that extend Skript's functionality.
 - Reqn is a **required** Skript addon that allows web requests in Skript. This allows the server to talk to the API.
 - WebEcon replaces your current economy manager with one that allows for calling requests to a web API.
 - Crypto.sk is a **required** script (a plugin made in Skript) that should be placed in the `plugins/Skript/scripts` folder. This allows for the basic functionality of importing, exporting, checking balance, paying and more.
+
+
 Are these requests that are called by players asynchronous?
 - Yes: we use async requests to provide the least performance impact to your server
