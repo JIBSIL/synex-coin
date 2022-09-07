@@ -11,7 +11,7 @@ Uses [solanaj](https://github.com/lmvdz/solanaj) for Solana Mint/AssociatedToken
 
 ## Installation  
 
-Download the latest `.jar` build from [build/libs](https://github.com/lmvdz/synex/tree/master/build/libs).  
+Download the latest `.jar` build from [build/libs](https://github.com/JIBSIL/synex-coin/releases).  
 Add to your `plugins` directory.  
 Start the server and edit the `plugins/synex/config.yml` file.  
 
