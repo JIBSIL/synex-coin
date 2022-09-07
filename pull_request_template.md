@@ -10,13 +10,14 @@ PR Type:
 
 PR Topic:
 
-- [ ] Plugin (WebEcon)
-- [ ] Plugin (Skript Frontend)
-- [ ] Backend API
-- [ ] Importer
+- [ ] Main plugin
 
 Important:
 - [ ] This PR makes breaking changes
 - [ ] This PR should/will be merged into the next dev/stable release
 - [ ] This PR will change the schematic of the API
 - [ ] This PR will make older versions incompatible
+
+Description:
+
+Description for this PR

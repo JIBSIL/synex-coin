@@ -35,7 +35,7 @@ Wait, but what if I don't want to use Synex as a player on a Synex-supported ser
 - You can opt-out of using synex simply by not exporting. This does not require any further steps.
 
 What if I want to import Synex Coin tokens (as a player)?
-- You can import tokens by using a web importing tool. This securely connects to your wallet and takes an amount you request, uses the server's exchange rate to convert to ingame currency and credits the tokens to whatever user you choose. You can always export the tokens later. Since this all takes place on a decentralized blockchain, **server owners can not authorize transactions on your behalf** and your coins are safe throughout the importing process.
+- Importing is currently still in development and will be re-added in a future version.
 
 What if I want to allow importing of tokens (as a server owner)?
-- *this part of the guide is still being revised for the Plugin version of Synex*
+- Importing is currently still in development and will be re-added in a future version.
